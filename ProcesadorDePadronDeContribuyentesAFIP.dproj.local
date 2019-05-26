@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2019/05/25 20:56:21.621.pas,C:\Users\pablo\Documents\RAD Studio\Projects\Unit2.pas=C:\z.system\PadronContribuyentesAFIP\Source\Main_u.pas</Transaction>
+    <Transaction>2019/05/25 20:56:21.621.dfm,C:\Users\pablo\Documents\RAD Studio\Projects\Unit2.dfm=C:\z.system\PadronContribuyentesAFIP\Source\Main_u.dfm</Transaction>
+    <Transaction>2019/05/25 20:56:40.205.dproj,C:\Users\pablo\Documents\RAD Studio\Projects\Project2.dproj=C:\z.system\PadronContribuyentesAFIP\Source\ProcesadorDePadronDeContribuyentesAFIP.dproj</Transaction>
+  </Transactions>
+</BorlandProject>

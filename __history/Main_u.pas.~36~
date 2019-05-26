@@ -1,0 +1,153 @@
+unit Main_u;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
+  Dialogs, StdCtrls, ExtCtrls;
+
+type
+
+  // El padrón se descarga de:
+  // http://www.afip.gob.ar/genericos/cInscripcion/archivoCompleto.asp
+  // Referencias:
+  // 'NI', 'N' = No Inscripto
+  // 'AC', 'S' = Activo
+  // 'EX' = Exento
+  // 'NA' = No alcanzado
+  // 'XN' = Exento no alcanzado
+  // 'AN' = Activo no alcanzado
+  // 'NC' = No corresponde
+
+  TContribuyenteAfip = record
+    cuit : String ;
+    denominacion : String ;
+    ganancias : String ;
+    iva : String ;
+    monitributo : String ;
+    integratesoc : String ;
+    empleador : String ;
+    actividadmonotributo : String ;
+  end;
+
+  TForm2 = class(TForm)
+    Label1: TLabel;
+    FileOpenDialog1: TFileOpenDialog;
+    edFileName: TEdit;
+    btnOpen: TButton;
+    Memo1: TMemo;
+    btnProcesar: TButton;
+    radFormato: TRadioGroup;
+    procedure btnOpenClick(Sender: TObject);
+    procedure btnProcesarClick(Sender: TObject);
+  private
+    SrcFile, DestFile: TextFile ;
+    procedure Agregar( s : String );
+    function LineaAContribuyente( s : String ) : TContribuyenteAfip ;
+  public
+    { Public declarations }
+  end;
+
+var
+  Form2: TForm2;
+
+implementation
+
+uses Funcion_u;
+
+{$R *.dfm}
+
+procedure TForm2.Agregar(s: String);
+begin
+  Memo1.Lines.Add( s );
+  Writeln( DestFile, s );
+end;
+
+procedure TForm2.btnOpenClick(Sender: TObject);
+begin
+  FileOpenDialog1.DefaultFolder := DirectorioDelExe ;
+  if FileOpenDialog1.Execute then
+    edFileName.Text := FileOpenDialog1.FileName ;
+end;
+
+procedure TForm2.btnProcesarClick(Sender: TObject);
+var
+  s, sSql : String ;
+  nro : Integer ;
+  sl : TStringList ;
+  contribuyente : TContribuyenteAfip ;
+begin
+  Memo1.Lines.Clear ;
+  sl := TStringList.Create ;
+  sl.StrictDelimiter := True ;
+  sl.Delimiter := ',';
+  AssignFile(SrcFile, edFileName.Text );
+  AssignFile(DestFile, DirectorioDelExe+'\salida.sql' );
+  Reset(SrcFile);
+  Rewrite(DestFile);
+  if radFormato.ItemIndex=0 then begin
+    Agregar( 'CREATE TABLE `cuit` (');
+    Agregar( '  `IDCUIT` int(11) NOT NULL AUTO_INCREMENT,');
+    Agregar( '  `CUIT` varchar(11) DEFAULT NULL,');
+    Agregar( '  `DENOMINACION` varchar(30) DEFAULT NULL,');
+    Agregar( '  `GANANCIAS` varchar(2) DEFAULT NULL,');
+    Agregar( '  `IVA` varchar(2) DEFAULT NULL,');
+    Agregar( '  `MONOTRIBUTO` varchar(2) DEFAULT NULL,');
+    Agregar( '  `INTEGRANTESOC` varchar(1) DEFAULT NULL,');
+    Agregar( '  `EMPLEADOR` varchar(1) DEFAULT NULL,');
+    Agregar( '  `ACTIVIDADMONOTRIBUTO` varchar(2) DEFAULT NULL,');
+    Agregar( '  PRIMARY KEY (`IDCUIT`),');
+    Agregar( '  KEY `CUIT` (`CUIT`)');
+    Agregar( ') ENGINE=MyISAM AUTO_INCREMENT=4354931 DEFAULT CHARSET=latin1;');
+    end
+  else begin
+    Agregar( 'CREATE TABLE cuit (');
+    Agregar( '  IDCUIT INTEGER NOT NULL,');
+    Agregar( '  CUIT varchar(11) DEFAULT NULL,');
+    Agregar( '  DENOMINACION varchar(30) DEFAULT NULL,');
+    Agregar( '  GANANCIAS varchar(2) DEFAULT NULL,');
+    Agregar( '  IVA varchar(2) DEFAULT NULL,');
+    Agregar( '  MONOTRIBUTO varchar(2) DEFAULT NULL,');
+    Agregar( '  INTEGRANTESOC varchar(1) DEFAULT NULL,');
+    Agregar( '  EMPLEADOR varchar(1) DEFAULT NULL,');
+    Agregar( '  ACTIVIDADMONOTRIBUTO varchar(2) DEFAULT NULL');
+    Agregar( ');');
+    Agregar( 'ALTER TABLE cuit ADD PRIMARY KEY (IDCUIT);');
+    end;
+  nro := 1 ;
+  repeat
+    ReadLn( SrcFile, s );
+    contribuyente := LineaAContribuyente( s );
+    sl.Clear ;
+    sl.Add( IntToStr( nro ) );
+    sl.Add( QuotedStr( contribuyente.cuit ) );
+    sl.Add( QuotedStr( contribuyente.denominacion ) );
+    sl.Add( QuotedStr( contribuyente.ganancias ) );
+    sl.Add( QuotedStr( contribuyente.iva ) );
+    sl.Add( QuotedStr( contribuyente.monitributo ) );
+    sl.Add( QuotedStr( contribuyente.integratesoc ) );
+    sl.Add( QuotedStr( contribuyente.empleador ) );
+    sl.Add( QuotedStr( contribuyente.actividadmonotributo ) );
+    Agregar( 'INSERT INTO cuit VALUES ('+sl.DelimitedText+');' );
+    nro := nro + 1 ;
+  until Eof(SrcFile) ;
+  Flush(DestFile);
+  CloseFile(DestFile);
+  CloseFile(SrcFile);
+  sl.Free ;
+end;
+
+function TForm2.LineaAContribuyente(s: String): TContribuyenteAfip;
+begin
+  result.cuit                 :=      Copy( s,  1, 11 );
+  result.denominacion         := Trim(Copy( s, 12, 30 ));
+  result.ganancias            :=      Copy( s, 42,  2 );
+  result.iva                  :=      Copy( s, 44,  2 );
+  result.monitributo          :=      Copy( s, 46,  2 );
+  result.integratesoc         :=      Copy( s, 48,  1 );
+  result.empleador            :=      Copy( s, 49,  1 );
+  result.actividadmonotributo :=      Copy( s, 51,  2 );
+end;
+
+end.
+
