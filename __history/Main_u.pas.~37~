@@ -4,11 +4,20 @@ interface
 
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
-  Dialogs, StdCtrls;
+  Dialogs, StdCtrls, ExtCtrls;
 
 type
 
+  // El padrón se descarga de:
   // http://www.afip.gob.ar/genericos/cInscripcion/archivoCompleto.asp
+  // Referencias:
+  // 'NI', 'N' = No Inscripto
+  // 'AC', 'S' = Activo
+  // 'EX' = Exento
+  // 'NA' = No alcanzado
+  // 'XN' = Exento no alcanzado
+  // 'AN' = Activo no alcanzado
+  // 'NC' = No corresponde
 
   TContribuyenteAfip = record
     cuit : String ;
@@ -28,6 +37,7 @@ type
     btnOpen: TButton;
     Memo1: TMemo;
     btnProcesar: TButton;
+    radFormato: TRadioGroup;
     procedure btnOpenClick(Sender: TObject);
     procedure btnProcesarClick(Sender: TObject);
   private
@@ -67,6 +77,7 @@ var
   sl : TStringList ;
   contribuyente : TContribuyenteAfip ;
 begin
+  Memo1.Lines.Clear ;
   sl := TStringList.Create ;
   sl.StrictDelimiter := True ;
   sl.Delimiter := ',';
@@ -74,20 +85,36 @@ begin
   AssignFile(DestFile, DirectorioDelExe+'\salida.sql' );
   Reset(SrcFile);
   Rewrite(DestFile);
-  Agregar( 'CREATE TABLE `cuit` (');
-  Agregar( '  `IDCUIT` int(11) NOT NULL AUTO_INCREMENT,');
-  Agregar( '  `CUIT` varchar(11) DEFAULT NULL,');
-  Agregar( '  `DENOMINACION` varchar(30) DEFAULT NULL,');
-  Agregar( '  `GANANCIAS` varchar(2) DEFAULT NULL,');
-  Agregar( '  `IVA` varchar(2) DEFAULT NULL,');
-  Agregar( '  `MONOTRIBUTO` varchar(2) DEFAULT NULL,');
-  Agregar( '  `INTEGRANTESOC` varchar(1) DEFAULT NULL,');
-  Agregar( '  `EMPLEADOR` varchar(1) DEFAULT NULL,');
-  Agregar( '  `ACTIVIDADMONOTRIBUTO` varchar(2) DEFAULT NULL,');
-  Agregar( '  PRIMARY KEY (`IDCUIT`),');
-  Agregar( '  KEY `CUIT` (`CUIT`)');
-  Agregar( ') ENGINE=MyISAM AUTO_INCREMENT=4354931 DEFAULT CHARSET=latin1;');
-
+  if radFormato.ItemIndex=0 then begin
+    Agregar( 'CREATE TABLE `cuit` (');
+    Agregar( '  `IDCUIT` int(11) NOT NULL AUTO_INCREMENT,');
+    Agregar( '  `CUIT` varchar(11) DEFAULT NULL,');
+    Agregar( '  `DENOMINACION` varchar(30) DEFAULT NULL,');
+    Agregar( '  `GANANCIAS` varchar(2) DEFAULT NULL,');
+    Agregar( '  `IVA` varchar(2) DEFAULT NULL,');
+    Agregar( '  `MONOTRIBUTO` varchar(2) DEFAULT NULL,');
+    Agregar( '  `INTEGRANTESOC` varchar(1) DEFAULT NULL,');
+    Agregar( '  `EMPLEADOR` varchar(1) DEFAULT NULL,');
+    Agregar( '  `ACTIVIDADMONOTRIBUTO` varchar(2) DEFAULT NULL,');
+    Agregar( '  PRIMARY KEY (`IDCUIT`),');
+    Agregar( '  KEY `CUIT` (`CUIT`)');
+    Agregar( ') ENGINE=MyISAM AUTO_INCREMENT=4354931 DEFAULT CHARSET=latin1;');
+    end
+  else begin
+    Agregar( 'CREATE TABLE cuit (');
+    Agregar( '  IDCUIT INTEGER NOT NULL,');
+    Agregar( '  CUIT varchar(11) DEFAULT NULL,');
+    Agregar( '  DENOMINACION varchar(30) DEFAULT NULL,');
+    Agregar( '  GANANCIAS varchar(2) DEFAULT NULL,');
+    Agregar( '  IVA varchar(2) DEFAULT NULL,');
+    Agregar( '  MONOTRIBUTO varchar(2) DEFAULT NULL,');
+    Agregar( '  INTEGRANTESOC varchar(1) DEFAULT NULL,');
+    Agregar( '  EMPLEADOR varchar(1) DEFAULT NULL,');
+    Agregar( '  ACTIVIDADMONOTRIBUTO varchar(2) DEFAULT NULL');
+    Agregar( ');');
+    Agregar( 'COMMIT;');
+    Agregar( 'ALTER TABLE cuit ADD PRIMARY KEY (IDCUIT);');
+    end;
   nro := 1 ;
   repeat
     ReadLn( SrcFile, s );
@@ -96,7 +123,13 @@ begin
     sl.Add( IntToStr( nro ) );
     sl.Add( QuotedStr( contribuyente.cuit ) );
     sl.Add( QuotedStr( contribuyente.denominacion ) );
-    Agregar( 'INSERT INTO CUIT VALUES ('+sl.DelimitedText+');' );
+    sl.Add( QuotedStr( contribuyente.ganancias ) );
+    sl.Add( QuotedStr( contribuyente.iva ) );
+    sl.Add( QuotedStr( contribuyente.monitributo ) );
+    sl.Add( QuotedStr( contribuyente.integratesoc ) );
+    sl.Add( QuotedStr( contribuyente.empleador ) );
+    sl.Add( QuotedStr( contribuyente.actividadmonotributo ) );
+    Agregar( 'INSERT INTO cuit VALUES ('+sl.DelimitedText+');' );
     nro := nro + 1 ;
   until Eof(SrcFile) ;
   Flush(DestFile);

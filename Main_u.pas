@@ -86,6 +86,7 @@ begin
   Reset(SrcFile);
   Rewrite(DestFile);
   if radFormato.ItemIndex=0 then begin
+    Agregar( 'DROP TABLE `cuit`;');
     Agregar( 'CREATE TABLE `cuit` (');
     Agregar( '  `IDCUIT` int(11) NOT NULL AUTO_INCREMENT,');
     Agregar( '  `CUIT` varchar(11) DEFAULT NULL,');
@@ -101,6 +102,7 @@ begin
     Agregar( ') ENGINE=MyISAM AUTO_INCREMENT=4354931 DEFAULT CHARSET=latin1;');
     end
   else begin
+    Agregar( 'DROP TABLE cuit;' );
     Agregar( 'CREATE TABLE cuit (');
     Agregar( '  IDCUIT INTEGER NOT NULL,');
     Agregar( '  CUIT varchar(11) DEFAULT NULL,');
