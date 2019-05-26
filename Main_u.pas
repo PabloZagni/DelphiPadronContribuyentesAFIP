@@ -38,6 +38,7 @@ type
     Memo1: TMemo;
     btnProcesar: TButton;
     radFormato: TRadioGroup;
+    Label2: TLabel;
     procedure btnOpenClick(Sender: TObject);
     procedure btnProcesarClick(Sender: TObject);
   private
@@ -99,7 +100,7 @@ begin
     Agregar( '  `ACTIVIDADMONOTRIBUTO` varchar(2) DEFAULT NULL,');
     Agregar( '  PRIMARY KEY (`IDCUIT`),');
     Agregar( '  KEY `CUIT` (`CUIT`)');
-    Agregar( ') ENGINE=MyISAM AUTO_INCREMENT=4354931 DEFAULT CHARSET=latin1;');
+    Agregar( ') ENGINE=InnoDB AUTO_INCREMENT=4354931 DEFAULT CHARSET=utf8;');
     end
   else begin
     Agregar( 'DROP TABLE cuit;' );

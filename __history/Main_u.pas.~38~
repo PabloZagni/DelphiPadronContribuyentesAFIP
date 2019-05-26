@@ -10,6 +10,14 @@ type
 
   // El padrón se descarga de:
   // http://www.afip.gob.ar/genericos/cInscripcion/archivoCompleto.asp
+  // Referencias:
+  // 'NI', 'N' = No Inscripto
+  // 'AC', 'S' = Activo
+  // 'EX' = Exento
+  // 'NA' = No alcanzado
+  // 'XN' = Exento no alcanzado
+  // 'AN' = Activo no alcanzado
+  // 'NC' = No corresponde
 
   TContribuyenteAfip = record
     cuit : String ;
@@ -69,6 +77,7 @@ var
   sl : TStringList ;
   contribuyente : TContribuyenteAfip ;
 begin
+  Memo1.Lines.Clear ;
   sl := TStringList.Create ;
   sl.StrictDelimiter := True ;
   sl.Delimiter := ',';
@@ -77,6 +86,7 @@ begin
   Reset(SrcFile);
   Rewrite(DestFile);
   if radFormato.ItemIndex=0 then begin
+    Agregar( 'DROP TABLE `cuit`;');
     Agregar( 'CREATE TABLE `cuit` (');
     Agregar( '  `IDCUIT` int(11) NOT NULL AUTO_INCREMENT,');
     Agregar( '  `CUIT` varchar(11) DEFAULT NULL,');
@@ -92,7 +102,20 @@ begin
     Agregar( ') ENGINE=MyISAM AUTO_INCREMENT=4354931 DEFAULT CHARSET=latin1;');
     end
   else begin
-
+    Agregar( 'DROP TABLE cuit;' );
+    Agregar( 'CREATE TABLE cuit (');
+    Agregar( '  IDCUIT INTEGER NOT NULL,');
+    Agregar( '  CUIT varchar(11) DEFAULT NULL,');
+    Agregar( '  DENOMINACION varchar(30) DEFAULT NULL,');
+    Agregar( '  GANANCIAS varchar(2) DEFAULT NULL,');
+    Agregar( '  IVA varchar(2) DEFAULT NULL,');
+    Agregar( '  MONOTRIBUTO varchar(2) DEFAULT NULL,');
+    Agregar( '  INTEGRANTESOC varchar(1) DEFAULT NULL,');
+    Agregar( '  EMPLEADOR varchar(1) DEFAULT NULL,');
+    Agregar( '  ACTIVIDADMONOTRIBUTO varchar(2) DEFAULT NULL');
+    Agregar( ');');
+    Agregar( 'COMMIT;');
+    Agregar( 'ALTER TABLE cuit ADD PRIMARY KEY (IDCUIT);');
     end;
   nro := 1 ;
   repeat
